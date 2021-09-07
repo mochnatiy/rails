@@ -614,6 +614,7 @@ module ActiveRecord
           self.class.register_class_with_precision m, "timestamp", OID::Timestamp, timezone: @default_timezone
           self.class.register_class_with_precision m, "timestamptz", OID::TimestampWithTimeZone
 
+          # puts "load_additional_types from initialize_type_map"
           load_additional_types
         end
 
@@ -701,6 +702,7 @@ module ActiveRecord
 
         def get_oid_type(oid, fmod, column_name, sql_type = "")
           if !type_map.key?(oid)
+            # puts "load_additional_types from get_oid_type"
             load_additional_types([oid])
           end
 
@@ -714,14 +716,26 @@ module ActiveRecord
 
         def load_additional_types(oids = nil)
           initializer = OID::TypeMapInitializer.new(type_map)
-          load_types_queries(initializer, oids) do |query|
-            execute_and_clear(query, "SCHEMA", []) do |records|
-              initializer.run(records)
+
+          # Potentially will not work when dumping
+          # if schema_cache.additional_type_records.present?
+          # TODO: extract this to another method and cover by test
+          if should_load_types_from_cache?(oids)
+            records = schema_cache.additional_type_records
+            initializer.run(records)
+          else
+            load_types_queries(initializer, oids) do |query|  
+              execute_and_clear(query, "SCHEMA", []) do |records|
+                schema_cache.additional_type_records |= records.to_a
+                initializer.run(records)
+              end
             end
           end
         end
 
         def load_types_queries(initializer, oids)
+          # puts "Getting additional_type_records from DB"
+
           query = <<~SQL
             SELECT t.oid, t.typname, t.typelem, t.typdelim, t.typinput, r.rngsubtype, t.typtype, t.typbasetype
             FROM pg_type as t
@@ -1006,14 +1020,28 @@ module ActiveRecord
             "timestamptz" => PG::TextDecoder::TimestampWithTimeZone,
           }
 
-          known_coder_types = coders_by_name.keys.map { |n| quote(n) }
-          query = <<~SQL % known_coder_types.join(", ")
-            SELECT t.oid, t.typname
-            FROM pg_type as t
-            WHERE t.typname IN (%s)
-          SQL
-          coders = execute_and_clear(query, "SCHEMA", []) do |result|
-            result.filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
+          if schema_cache.known_coder_type_records.present?
+            # puts "Getting known_coder_type_records from Schema cache"
+
+            coders = schema_cache
+              .known_coder_type_records
+              .filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
+          else
+            known_coder_types = coders_by_name.keys.map { |n| quote(n) }
+
+            query = <<~SQL % known_coder_types.join(", ")
+              SELECT t.oid, t.typname
+              FROM pg_type as t
+              WHERE t.typname IN (%s)
+            SQL
+
+            coders = execute_and_clear(query, "SCHEMA", []) do |result|
+              schema_cache.known_coder_type_records |= result.to_a
+
+              # puts "Getting known_coder_type_records from DB"
+
+              result.filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
+            end
           end
 
           map = PG::TypeMapByOid.new
@@ -1033,6 +1061,16 @@ module ActiveRecord
         def construct_coder(row, coder_class)
           return unless coder_class
           coder_class.new(oid: row["oid"].to_i, name: row["typname"])
+        end
+
+        def should_load_types_from_cache?(oids)
+          if oids.blank?
+            schema_cache.additional_type_records.present?
+          else
+            # TODO: Check when this could be false
+            cached_oids = schema_cache.additional_type_records.map { |oid| oid["oid"] }
+            (oids - cached_oids).empty?
+          end
         end
 
         class MoneyDecoder < PG::SimpleDecoder # :nodoc:
