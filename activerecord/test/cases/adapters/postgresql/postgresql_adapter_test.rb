@@ -24,14 +24,13 @@ module ActiveRecord
 
       def test_reconnection_error
         fake_connection = Class.new do
+          attr_accessor :type_map_for_results
+
           def async_exec(*)
             [{}]
           end
 
           def type_map_for_queries=(_)
-          end
-
-          def type_map_for_results=(_)
           end
 
           def exec_params(*)

@@ -1021,12 +1021,13 @@ module ActiveRecord
           }
 
           if schema_cache.known_coder_type_records.present?
-            # puts "Getting known_coder_type_records from Schema cache"
+            # puts "Getting known_coder_type_records from Schema cache\r\n"
 
             coders = schema_cache
               .known_coder_type_records
               .filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
           else
+            # puts "Getting known_coder_type_records from DB\r\n"
             known_coder_types = coders_by_name.keys.map { |n| quote(n) }
 
             query = <<~SQL % known_coder_types.join(", ")
