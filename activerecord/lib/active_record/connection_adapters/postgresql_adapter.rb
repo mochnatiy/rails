@@ -721,9 +721,11 @@ module ActiveRecord
           # if schema_cache.additional_type_records.present?
           # TODO: extract this to another method and cover by test
           if should_load_types_from_cache?(oids)
+            # puts "Getting additional types from SC\r\n"
             records = schema_cache.additional_type_records
             initializer.run(records)
           else
+            # puts "Getting additional types from DB\r\n"
             load_types_queries(initializer, oids) do |query|  
               execute_and_clear(query, "SCHEMA", []) do |records|
                 schema_cache.additional_type_records |= records.to_a
@@ -1038,8 +1040,6 @@ module ActiveRecord
 
             coders = execute_and_clear(query, "SCHEMA", []) do |result|
               schema_cache.known_coder_type_records |= result.to_a
-
-              # puts "Getting known_coder_type_records from DB"
 
               result.filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
             end
