@@ -11,6 +11,16 @@ module ActiveRecord
         @database_version = @connection.get_database_version
       end
 
+      def test_type_map_existence_in_schema_cache
+        # TODO: Check why this test doesn't work
+        return unless current_adapter?(:PostgreSQLAdapter)
+
+        cache = SchemaCache.new ActiveRecord::Base.connection
+
+        assert_not cache.additional_type_records.empty?
+        assert_not cache.known_coder_type_records.empty?
+      end
+
       def test_yaml_dump_and_load
         # Create an empty cache.
         cache = SchemaCache.new @connection
@@ -34,6 +44,13 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            puts cache.additional_type_records.inspect
+            puts cache.inspect
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
       ensure
         tempfile.unlink
@@ -72,6 +89,11 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
 
         # Load the cache the usual way.
@@ -87,6 +109,11 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
       ensure
         tempfile.unlink
@@ -201,6 +228,11 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
       end
 
@@ -223,6 +255,11 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
       ensure
         tempfile.unlink
@@ -284,6 +321,11 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
 
         # Load a new cache.
@@ -297,6 +339,11 @@ module ActiveRecord
           assert_equal "id", cache.primary_keys("posts")
           assert_equal 1, cache.indexes("posts").size
           assert_equal @database_version.to_s, cache.database_version.to_s
+
+          if current_adapter?(:PostgreSQLAdapter)
+            assert_not cache.additional_type_records.empty?
+            assert_not cache.known_coder_type_records.empty?
+          end
         end
       ensure
         tempfile.unlink
