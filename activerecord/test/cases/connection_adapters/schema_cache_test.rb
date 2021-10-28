@@ -15,10 +15,15 @@ module ActiveRecord
         # TODO: Check why this test doesn't work
         return unless current_adapter?(:PostgreSQLAdapter)
 
-        cache = SchemaCache.new ActiveRecord::Base.connection
+        db_config = ActiveRecord::Base.configurations.configs_for(
+          env_name: 'arunit',
+          name: 'primary'
+        )
 
-        assert_not cache.additional_type_records.empty?
-        assert_not cache.known_coder_type_records.empty?
+        connection = ActiveRecord::Base.postgresql_connection(db_config.configuration_hash)
+
+        assert_not connection.schema_cache.additional_type_records.empty?
+        assert_not connection.schema_cache.known_coder_type_records.empty?
       end
 
       def test_yaml_dump_and_load

@@ -40,12 +40,13 @@ module ActiveRecord
 
       def initialize(conn)
         @connection = conn
-
         @columns      = {}
         @columns_hash = {}
         @primary_keys = {}
         @data_sources = {}
         @indexes      = {}
+        self.additional_type_records = []
+        self.known_coder_type_records = []
       end
 
       def initialize_dup(other)
