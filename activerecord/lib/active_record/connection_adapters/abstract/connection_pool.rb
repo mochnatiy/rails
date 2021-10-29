@@ -6,12 +6,17 @@ require "monitor"
 
 require "active_record/connection_adapters/abstract/connection_pool/queue"
 require "active_record/connection_adapters/abstract/connection_pool/reaper"
+require "active_record/connection_adapters/postgresql/schema_cache"
 
 module ActiveRecord
   module ConnectionAdapters
     module AbstractPool # :nodoc:
       def get_schema_cache(connection)
-        self.schema_cache ||= SchemaCache.new(connection)
+        if connection.adapter_name == "PostgreSQL"
+          self.schema_cache ||= PostgreSQL::SchemaCache.new(connection)
+        else
+          self.schema_cache ||= SchemaCache.new(connection)
+        end
         schema_cache.connection = connection
         schema_cache
       end
