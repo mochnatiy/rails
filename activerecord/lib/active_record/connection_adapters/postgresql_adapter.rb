@@ -12,6 +12,7 @@ require "active_record/connection_adapters/postgresql/explain_pretty_printer"
 require "active_record/connection_adapters/postgresql/oid"
 require "active_record/connection_adapters/postgresql/quoting"
 require "active_record/connection_adapters/postgresql/referential_integrity"
+require "active_record/connection_adapters/postgresql/schema_cache"
 require "active_record/connection_adapters/postgresql/schema_creation"
 require "active_record/connection_adapters/postgresql/schema_definitions"
 require "active_record/connection_adapters/postgresql/schema_dumper"
@@ -600,6 +601,10 @@ module ActiveRecord
             OID::Interval.new(precision: precision)
           end
         end
+      end
+
+      def init_schema_cache
+        PostgreSQL::SchemaCache.new(self)
       end
 
       private

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveRecord
-  module ConnectionAdagiters
+  module ConnectionAdapters
     module PostgreSQL
       class SchemaCache < ActiveRecord::ConnectionAdapters::SchemaCache
         cattr_accessor :additional_type_records, default: []
