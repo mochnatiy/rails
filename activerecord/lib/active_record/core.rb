@@ -677,6 +677,7 @@ module ActiveRecord
     end
 
     def connection_handler
+      puts "calling connection_handler from CORE.RB"
       self.class.connection_handler
     end
 

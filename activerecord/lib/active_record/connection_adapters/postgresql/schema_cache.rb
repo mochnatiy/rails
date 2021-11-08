@@ -7,13 +7,6 @@ module ActiveRecord
         cattr_accessor :additional_type_records, default: []
         cattr_accessor :known_coder_type_records, default: []
 
-        def initialize(conn)
-          super
-
-          self.additional_type_records = []
-          self.known_coder_type_records = []
-        end
-
         def encode_with(coder)
           super
 
