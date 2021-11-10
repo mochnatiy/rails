@@ -725,16 +725,14 @@ module ActiveRecord
           # TODO: extract this to another method and cover by test
           if should_load_types_from_cache?(oids)
             puts "Should load types from cache? true"
+
             records = schema_cache.additional_type_records
             initializer.run(records)
           else
             puts "Should load types from cache? false"
             load_types_queries(initializer, oids) do |query|
-              require "pry"
-              #binding.pry
               puts "query: #{query}"
               execute_and_clear(query, "SCHEMA", []) do |records|
-                #binding.pry
                 puts "records: #{records}"
                 schema_cache.additional_type_records |= records.to_a
                 initializer.run(records)

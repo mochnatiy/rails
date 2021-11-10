@@ -447,6 +447,22 @@ module ActiveRecord
         end
       end
 
+      def test_type_map_queries_schema_cache_file_is_missing_types
+        db_config = ActiveRecord::Base.configurations.configs_for(
+          env_name: 'arunit',
+          name: 'primary'
+        )
+
+        PostgreSQL::SchemaCache.additional_type_records = []
+        #require 'pry'
+        #binding.pry
+        assert_queries(1) do
+          ActiveRecord::Base.postgresql_connection(db_config.configuration_hash)
+        end
+        #binding.pry
+        assert_not @connection.schema_cache.additional_type_records.empty?
+      end
+
       private
         def with_example_table(definition = "id serial primary key, number integer, data character varying(255)", &block)
           super(@connection, "ex", definition, &block)
