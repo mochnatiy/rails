@@ -385,8 +385,8 @@ module ActiveRecord
       def test_only_reload_type_map_once_for_every_unrecognized_type
         reset_connection
 
-        ActiveRecord::ConnectionAdapters::SchemaCache.additional_type_records = []
-        ActiveRecord::ConnectionAdapters::SchemaCache.known_coder_type_records = []
+        ActiveRecord::ConnectionAdapters::PostgreSQL::SchemaCache.additional_type_records = []
+        ActiveRecord::ConnectionAdapters::PostgreSQL::SchemaCache.known_coder_type_records = []
 
         connection = ActiveRecord::Base.connection
 
@@ -434,33 +434,6 @@ module ActiveRecord
           first_number.save!
           assert_equal 4, first_number.reload.number
         end
-      end
-
-      def test_type_map_queries_when_initialize_connection
-        db_config = ActiveRecord::Base.configurations.configs_for(
-          env_name: 'arunit',
-          name: 'primary'
-        )
-
-        assert_no_sql('SELECT t.oid, t.typname') do
-          ActiveRecord::Base.postgresql_connection(db_config.configuration_hash)
-        end
-      end
-
-      def test_type_map_queries_schema_cache_file_is_missing_types
-        db_config = ActiveRecord::Base.configurations.configs_for(
-          env_name: 'arunit',
-          name: 'primary'
-        )
-
-        PostgreSQL::SchemaCache.additional_type_records = []
-        #require 'pry'
-        #binding.pry
-        assert_queries(1) do
-          ActiveRecord::Base.postgresql_connection(db_config.configuration_hash)
-        end
-        #binding.pry
-        assert_not @connection.schema_cache.additional_type_records.empty?
       end
 
       private
