@@ -6,7 +6,6 @@ require "monitor"
 
 require "active_record/connection_adapters/abstract/connection_pool/queue"
 require "active_record/connection_adapters/abstract/connection_pool/reaper"
-require "active_record/connection_adapters/postgresql/schema_cache"
 
 module ActiveRecord
   module ConnectionAdapters
