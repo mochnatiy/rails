@@ -724,16 +724,11 @@ module ActiveRecord
           # if schema_cache.additional_type_records.present?
           # TODO: extract this to another method and cover by test
           if should_load_types_from_cache?(oids)
-            # puts "Should load types from cache? true"
-
             records = schema_cache.additional_type_records
             initializer.run(records)
           else
-            # puts "Should load types from cache? false"
             load_types_queries(initializer, oids) do |query|
-              # puts "query: #{query}"
               execute_and_clear(query, "SCHEMA", []) do |records|
-                # puts "records: #{records}"
                 schema_cache.additional_type_records |= records.to_a
                 initializer.run(records)
               end
@@ -1033,14 +1028,12 @@ module ActiveRecord
           else
             known_coder_types = coders_by_name.keys.map { |n| quote(n) }
 
-            # puts "running query from add_pg_decoder"
             query = <<~SQL % known_coder_types.join(", ")
               SELECT t.oid, t.typname
               FROM pg_type as t
               WHERE t.typname IN (%s)
             SQL
 
-            # puts "add_pg_decoder result: #{query}"
             coders = execute_and_clear(query, "SCHEMA", []) do |result|
               schema_cache.known_coder_type_records |= result.to_a
 
@@ -1069,10 +1062,8 @@ module ActiveRecord
 
         def should_load_types_from_cache?(oids)
           if oids.blank?
-            # puts "oid is blank"
             schema_cache.additional_type_records.present?
           else
-            # puts "oid is not blank"
             cached_oids = schema_cache.additional_type_records.map { |oid| oid["oid"] }
             (oids - cached_oids).empty?
           end
