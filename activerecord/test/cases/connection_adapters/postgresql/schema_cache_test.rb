@@ -19,11 +19,11 @@ module ActiveRecord
 
         def test_type_map_queries_when_initialize_connection
           db_config = ActiveRecord::Base.configurations.configs_for(
-            env_name: 'arunit',
-            name: 'primary'
+            env_name: "arunit",
+            name: "primary"
           )
 
-          assert_no_sql('SELECT t.oid, t.typname') do
+          assert_no_sql("SELECT t.oid, t.typname") do
             ActiveRecord::Base.postgresql_connection(db_config.configuration_hash)
           end
         end
@@ -34,7 +34,7 @@ module ActiveRecord
           cache = SchemaCache.new(@connection)
           tempfile = Tempfile.new(["schema_cache-", ".yml"])
 
-          assert_no_sql('SELECT t.oid, t.typname') do
+          assert_no_sql("SELECT t.oid, t.typname") do
             cache.dump_to(tempfile.path)
           end
 
