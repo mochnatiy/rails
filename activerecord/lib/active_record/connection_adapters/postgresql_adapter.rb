@@ -720,9 +720,8 @@ module ActiveRecord
         def load_additional_types(oids = nil)
           initializer = OID::TypeMapInitializer.new(type_map)
 
-          # Potentially will not work when dumping
-          # if schema_cache.additional_type_records.present?
-          # TODO: extract this to another method and cover by test
+          # Will not work when dumping, a dump file should be recreated on each
+          # schema_cache:dump
           if should_load_types_from_cache?(oids)
             records = schema_cache.additional_type_records
             initializer.run(records)
