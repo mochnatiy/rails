@@ -8,6 +8,9 @@ module ActiveRecord
       def self.load_from(filename)
         return unless File.file?(filename)
 
+        # binding.break
+        puts "load_from\r\n"
+
         read(filename) do |file|
           if filename.include?(".dump")
             Marshal.load(file)

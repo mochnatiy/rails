@@ -2,6 +2,7 @@
 
 require "thread"
 require "concurrent/map"
+require 'debug'
 
 module ActiveRecord
   module ConnectionAdapters
@@ -102,6 +103,7 @@ module ActiveRecord
       alias :connection_pools :connection_pool_list
 
       def establish_connection(config, owner_name: Base, role: ActiveRecord::Base.current_role, shard: Base.current_shard)
+        # binding.break
         owner_name = StringConnectionOwner.new(config.to_s) if config.is_a?(Symbol)
 
         pool_config = resolve_pool_config(config, owner_name, role, shard)

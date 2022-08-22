@@ -90,6 +90,7 @@ module ActiveRecord
       end
 
       def initialize(connection, logger = nil, config = {}) # :nodoc:
+        binding.break
         super()
 
         @raw_connection      = connection
@@ -175,6 +176,7 @@ module ActiveRecord
       def schema_migration # :nodoc:
         @schema_migration ||= begin
                                 conn = self
+                                # binding.break
                                 spec_name = conn.pool.pool_config.connection_specification_name
 
                                 return ActiveRecord::SchemaMigration if spec_name == "ActiveRecord::Base"

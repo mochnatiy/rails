@@ -3,6 +3,7 @@
 require "thread"
 require "concurrent/map"
 require "monitor"
+require 'debug'
 
 require "active_record/connection_adapters/abstract/connection_pool/queue"
 require "active_record/connection_adapters/abstract/connection_pool/reaper"
@@ -23,7 +24,18 @@ module ActiveRecord
       def lazily_set_schema_cache
         return unless ActiveRecord.lazily_load_schema_cache
 
-        cache = SchemaCache.load_from(db_config.lazy_schema_cache_path)
+        # NEXT: At the moment of loading schema cache we don't have anything here: self.schema_cache
+        schema_cache_handler = if db_config.configuration_hash[:adapter] == "postgresql"
+          PostgreSQL::SchemaCache
+        else
+          SchemaCache
+        end
+        binding.break
+        cache = schema_cache_handler.load_from(db_config.lazy_schema_cache_path)
+
+        puts "lazily_load_schema_cache\r\n"
+        puts "cache class: #{cache.class}\r\n"
+        puts "cache id: #{cache.object_id}\r\n"
         set_schema_cache(cache)
       end
     end
@@ -158,6 +170,9 @@ module ActiveRecord
 
         @async_executor = build_async_executor
 
+        # binding.break
+
+        # NEXT: Smth is wrong here, we should have the same connection pool and schema cache object when we intialize adapter
         lazily_set_schema_cache
 
         @reaper = Reaper.new(self, db_config.reaping_frequency)

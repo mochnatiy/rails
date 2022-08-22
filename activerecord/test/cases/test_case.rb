@@ -68,6 +68,7 @@ module ActiveRecord
     end
 
     def assert_no_sql(query_string)
+      binding.break
       ActiveRecord::Base.connection.materialize_transactions
       SQLCounter.clear_log
 

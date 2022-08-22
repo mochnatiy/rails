@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'debug'
 
 module ActiveRecord
   module ConnectionHandling
@@ -47,6 +48,7 @@ module ActiveRecord
     # The exceptions AdapterNotSpecified, AdapterNotFound, and +ArgumentError+
     # may be returned on an error.
     def establish_connection(config_or_env = nil)
+      # binding.break
       config_or_env ||= DEFAULT_ENV.call.to_sym
       db_config, owner_name = resolve_config_for_connection(config_or_env)
       connection_handler.establish_connection(db_config, owner_name: owner_name, role: current_role, shard: current_shard)

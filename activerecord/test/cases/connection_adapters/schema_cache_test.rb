@@ -369,6 +369,12 @@ module ActiveRecord
           assert_not_empty ActiveRecord::Base.connection.schema_cache.instance_variable_get(:@primary_keys)
           assert_not_empty ActiveRecord::Base.connection.schema_cache.instance_variable_get(:@data_sources)
           assert_not_empty ActiveRecord::Base.connection.schema_cache.instance_variable_get(:@indexes)
+
+          if current_adapter?(:PostgreSQLAdapter)
+            puts ActiveRecord::Base.connection.schema_cache.class.inspect
+            assert_not_empty ActiveRecord::Base.connection.schema_cache.instance_variable_get(:@known_coder_type_records)
+            assert_not_empty ActiveRecord::Base.connection.schema_cache.instance_variable_get(:@additional_type_records)
+          end
         ensure
           ActiveRecord.lazily_load_schema_cache = old_config
           ActiveRecord::Base.establish_connection(:arunit)

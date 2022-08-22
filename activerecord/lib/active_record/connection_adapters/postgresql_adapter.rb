@@ -2,6 +2,7 @@
 
 gem "pg", "~> 1.1"
 require "pg"
+require 'debug'
 
 require "active_support/core_ext/object/try"
 require "active_record/connection_adapters/abstract_adapter"
@@ -33,6 +34,8 @@ module ActiveRecord
       # Forward only valid config params to PG::Connection.connect.
       valid_conn_param_keys = PG::Connection.conndefaults_hash.keys + [:requiressl]
       conn_params.slice!(*valid_conn_param_keys)
+
+      puts "CALLING PG ADAPTER NEW"
 
       ConnectionAdapters::PostgreSQLAdapter.new(
         ConnectionAdapters::PostgreSQLAdapter.new_client(conn_params),
@@ -76,6 +79,7 @@ module ActiveRecord
 
       class << self
         def new_client(conn_params)
+          binding.break
           PG.connect(**conn_params)
         rescue ::PG::Error => error
           if conn_params && conn_params[:dbname] && error.message.include?(conn_params[:dbname])
@@ -744,6 +748,9 @@ module ActiveRecord
 
           # Will not work when dumping, a dump file should be recreated on each
           # schema_cache:dump
+          # binding.break
+          puts "load_additional_types\r\n"
+
           if should_load_types_from_cache?(oids)
             records = schema_cache.additional_type_records
             initializer.run(records)
@@ -917,6 +924,8 @@ module ActiveRecord
             end
           end
 
+          binding.break
+
           add_pg_encoders
           add_pg_decoders
 
@@ -1051,6 +1060,9 @@ module ActiveRecord
             "timestamptz" => PG::TextDecoder::TimestampWithTimeZone,
           }
 
+          # binding.break
+          puts "add_pg_decoders\r\n"
+
           if schema_cache.known_coder_type_records.present?
             coders = schema_cache
               .known_coder_type_records
@@ -1091,6 +1103,11 @@ module ActiveRecord
         end
 
         def should_load_types_from_cache?(oids)
+          puts "should_load_types_from_cache\r\n"
+          puts "oids: #{oids}\r\n"
+          puts "addtyprec: #{schema_cache.additional_type_records}\r\n"
+          puts "schema_cache_id: #{schema_cache.object_id}"
+          puts "schema_cache_class: #{schema_cache.class}"
           if oids.blank?
             schema_cache.additional_type_records.present?
           else
