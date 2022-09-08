@@ -17,8 +17,10 @@ require "active_record/connection_adapters/postgresql/schema_creation"
 require "active_record/connection_adapters/postgresql/schema_definitions"
 require "active_record/connection_adapters/postgresql/schema_dumper"
 require "active_record/connection_adapters/postgresql/schema_statements"
+require "active_record/connection_adapters/postgresql/type_map_cache"
 require "active_record/connection_adapters/postgresql/type_metadata"
 require "active_record/connection_adapters/postgresql/utils"
+require 'debug'
 
 module ActiveRecord
   module ConnectionHandling # :nodoc:
@@ -792,12 +794,12 @@ module ActiveRecord
           # Will not work when dumping, a dump file should be recreated on each
           # schema_cache:dump
           if should_load_types_from_cache?(oids)
-            records = schema_cache.additional_type_records
+            records = PostgreSQL::TypeMapCache.instance.additional_type_records
             initializer.run(records)
           else
             load_types_queries(initializer, oids) do |query|
               execute_and_clear(query, "SCHEMA", [], allow_retry: true, uses_transaction: false) do |records|
-                schema_cache.additional_type_records |= records.to_a
+                PostgreSQL::TypeMapCache.instance.additional_type_records |= records.to_a
                 initializer.run(records)
               end
             end
@@ -973,6 +975,8 @@ module ActiveRecord
             end
           end
 
+          binding.break
+
           add_pg_encoders
           add_pg_decoders
 
@@ -1109,8 +1113,9 @@ module ActiveRecord
             "timestamptz" => PG::TextDecoder::TimestampWithTimeZone,
           }
 
-          if schema_cache.known_coder_type_records.present?
-            coders = schema_cache
+          # binding.break
+          if PostgreSQL::TypeMapCache.instance.known_coder_type_records.present?
+            coders = PostgreSQL::TypeMapCache.instance
               .known_coder_type_records
               .filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
           else
@@ -1123,7 +1128,7 @@ module ActiveRecord
             SQL
 
             coders = execute_and_clear(query, "SCHEMA", [], allow_retry: true, uses_transaction: false) do |result|
-              schema_cache.known_coder_type_records |= result.to_a
+              PostgreSQL::TypeMapCache.instance.known_coder_type_records |= result.to_a
 
               result.filter_map { |row| construct_coder(row, coders_by_name[row["typname"]]) }
             end
@@ -1150,9 +1155,9 @@ module ActiveRecord
 
         def should_load_types_from_cache?(oids)
           if oids.blank?
-            schema_cache.additional_type_records.present?
+            PostgreSQL::TypeMapCache.instance.additional_type_records.present?
           else
-            cached_oids = schema_cache.additional_type_records.map { |oid| oid["oid"] }
+            cached_oids = PostgreSQL::TypeMapCache.instance.additional_type_records.map { |oid| oid["oid"] }
             (oids - cached_oids).empty?
           end
         end
