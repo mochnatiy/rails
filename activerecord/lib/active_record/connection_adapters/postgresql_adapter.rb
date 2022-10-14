@@ -975,7 +975,8 @@ module ActiveRecord
             end
           end
 
-          binding.break
+          # HINT: Use this breakpoint to check locally with the dummy app
+          # binding.break
 
           add_pg_encoders
           add_pg_decoders

@@ -6,6 +6,7 @@ module ActiveRecord
   module ConnectionAdapters
     class SchemaCache
       def self.load_from(filename)
+        # binding.break
         return unless File.file?(filename)
 
         read(filename) do |file|
@@ -22,6 +23,7 @@ module ActiveRecord
       end
 
       def self.read(filename, &block)
+        # binding.break
         if File.extname(filename) == ".gz"
           Zlib::GzipReader.open(filename) { |gz|
             yield gz.read

@@ -151,6 +151,11 @@ To keep using the current cache store, you can turn off cache versioning entirel
 
             next if cache.nil?
 
+            # NEXT TODO: Maybe put it into ConnectionPool
+            if connection_pool.db_config.configuration_hash[:adapter] == "postgresql"
+              ActiveRecord::ConnectionAdapters::PostgreSQL::TypeMapCache.init(cache)
+            end
+
             if check_schema_cache_dump_version
               current_version = begin
                 ActiveRecord::Migrator.current_version
