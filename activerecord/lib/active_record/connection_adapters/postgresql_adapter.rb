@@ -20,7 +20,6 @@ require "active_record/connection_adapters/postgresql/schema_statements"
 require "active_record/connection_adapters/postgresql/type_map_cache"
 require "active_record/connection_adapters/postgresql/type_metadata"
 require "active_record/connection_adapters/postgresql/utils"
-require 'debug'
 
 module ActiveRecord
   module ConnectionHandling # :nodoc:
@@ -975,9 +974,6 @@ module ActiveRecord
             end
           end
 
-          # HINT: Use this breakpoint to check locally with the dummy app
-          # binding.break
-
           add_pg_encoders
           add_pg_decoders
 
@@ -1114,7 +1110,6 @@ module ActiveRecord
             "timestamptz" => PG::TextDecoder::TimestampWithTimeZone,
           }
 
-          # binding.break
           if PostgreSQL::TypeMapCache.instance.known_coder_type_records.present?
             coders = PostgreSQL::TypeMapCache.instance
               .known_coder_type_records

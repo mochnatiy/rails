@@ -27,28 +27,6 @@ module ActiveRecord
           super
         end
 
-=begin
-        def additional_type_records
-          @additional_type_records.presence || PostgreSQL::TypeMapCache.instance.additional_type_records
-        end
-
-        def known_coder_type_records
-          @known_coder_type_records.presence || PostgreSQL::TypeMapCache.instance.known_coder_type_records
-        end
-
-         def additional_type_records=(add_type_rec)
-          # binding.break
-          PostgreSQL::TypeMapCache.instance.additional_type_records = add_type_rec
-          @additional_type_records = add_type_rec
-        end
-
-        def known_coder_type_records=(known_code_type_rec)
-          # binding.break
-          PostgreSQL::TypeMapCache.instance.known_coder_type_records = known_code_type_rec
-          @known_coder_type_records = known_code_type_rec
-        end
-=end
-
         def marshal_dump
           reset_version!
 
