@@ -54,7 +54,7 @@ module ActiveRecord
             PostgreSQL::TypeMapCache.clear
 
             assert_sql(/SELECT t.oid, t.typname/) do
-              new_connection = ActiveRecord::Base.establish_connection(new_config)
+              ActiveRecord::Base.establish_connection(new_config)
             end
           end
 

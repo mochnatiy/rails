@@ -24,7 +24,7 @@ module ActiveRecord
         return unless ActiveRecord.lazily_load_schema_cache
 
         cache = SchemaCache.load_from(db_config.lazy_schema_cache_path)
-        PostgreSQL::TypeMapCache.init(cache) if connection.adapter_name == 'PostgreSQL'
+        PostgreSQL::TypeMapCache.init(cache) if connection.adapter_name == "PostgreSQL"
 
         set_schema_cache(cache)
       end
